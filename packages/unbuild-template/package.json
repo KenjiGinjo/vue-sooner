@@ -3,15 +3,15 @@
   "type": "module",
   "version": "0.0.0",
   "description": "unbuild package template",
-  "author": "ice breaker <1324318532@qq.com>",
+  "author": "Kenji Ginjo <120051456+KenjiGinjo@users.noreply.github.com>",
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sonofmagic/monorepo-template.git",
+    "url": "git+https://github.com/KenjiGinjo/vue-sooner.git",
     "directory": "packages/unbuild-template"
   },
   "bugs": {
-    "url": "https://github.com/sonofmagic/monorepo-template/issues"
+    "url": "https://github.com/KenjiGinjo/vue-sooner/issues"
   },
   "keywords": [],
   "sideEffects": false,
