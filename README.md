@@ -1,4 +1,4 @@
-# Vue 3 Toast Component
+# Vue 3 Toast Component (正在开发中请勿使用)
 
 一个基于Vue 3的现代化toast通知组件，提供丰富的功能和优雅的用户体验。
 
