@@ -1,6 +1,6 @@
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref } from 'vue'
 import { useToast as useToastState } from '../state'
-import type { ToastComposable, ToastT, ExternalToast } from '../types'
+import type { ToastComposable } from '../types'
 
 /**
  * Vue 3 composable for toast functionality

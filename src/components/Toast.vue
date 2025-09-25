@@ -4,7 +4,6 @@
     data-sonner-toast
     :data-styled="!toast.unstyled"
     :data-mounted="mounted"
-    :data-promise="Boolean(toast.promise)"
     :data-removed="removed"
     :data-visible="mounted && !removed"
     :data-y-position="props.position?.split('-')[0] || 'bottom'"

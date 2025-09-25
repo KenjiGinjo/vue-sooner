@@ -1,15 +1,12 @@
 import type {
   ExternalToast,
-  PromiseData,
-  PromiseIExtendedResult,
-  PromiseT,
   ToastComposable,
   ToastFunction,
   ToastT,
   ToastToDismiss,
   ToastTypes,
 } from './types'
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 
 let toastsCounter = 1
 
@@ -49,7 +46,6 @@ class Observer {
     data: ExternalToast & {
       message?: titleT
       type?: ToastTypes
-      promise?: PromiseT
       jsx?: any
     },
   ) => {
@@ -125,133 +121,6 @@ class Observer {
     return this.create({ ...data, type: 'loading', message })
   }
 
-  promise = <ToastData>(promise: PromiseT<ToastData>, data?: PromiseData<ToastData>) => {
-    if (!data) {
-      // Nothing to show
-      return
-    }
-
-    let id: string | number | undefined
-    if (data.loading !== undefined) {
-      id = this.create({
-        ...data,
-        promise,
-        type: 'loading',
-        message: data.loading,
-        description: typeof data.description !== 'function' ? data.description : undefined,
-      })
-    }
-
-    const p = Promise.resolve(typeof promise === 'function' ? promise() : promise)
-
-    let shouldDismiss = id !== undefined
-    let result: ['resolve', ToastData] | ['reject', unknown]
-
-    const originalPromise = p
-      .then(async (response) => {
-        result = ['resolve', response]
-        const isVueElementResponse = response && typeof response === 'object' && '__v_isVNode' in response
-        if (isVueElementResponse) {
-          shouldDismiss = false
-          this.create({ id, type: 'default', message: response })
-        }
-        else if (isHttpResponse(response) && !response.ok) {
-          shouldDismiss = false
-
-          const promiseData
-            = typeof data.error === 'function' ? await data.error(`HTTP error! status: ${response.status}`) : data.error
-
-          const description
-            = typeof data.description === 'function'
-              ? await data.description(`HTTP error! status: ${response.status}`)
-              : data.description
-
-          const isExtendedResult = typeof promiseData === 'object' && !isVueElementResponse
-
-          const toastSettings: PromiseIExtendedResult = isExtendedResult
-            ? (promiseData as PromiseIExtendedResult)
-            : { message: promiseData || '' }
-
-          this.create({ id, type: 'error', description, ...toastSettings })
-        }
-        else if (response instanceof Error) {
-          shouldDismiss = false
-
-          const promiseData = typeof data.error === 'function' ? await data.error(response) : data.error
-
-          const description
-            = typeof data.description === 'function' ? await data.description(response) : data.description
-
-          const isExtendedResult = typeof promiseData === 'object' && !isVueElementResponse
-
-          const toastSettings: PromiseIExtendedResult = isExtendedResult
-            ? (promiseData as PromiseIExtendedResult)
-            : { message: promiseData || '' }
-
-          this.create({ id, type: 'error', description, ...toastSettings })
-        }
-        else if (data.success !== undefined) {
-          shouldDismiss = false
-          const promiseData = typeof data.success === 'function' ? await data.success(response) : data.success
-
-          const description
-            = typeof data.description === 'function' ? await data.description(response) : data.description
-
-          const isExtendedResult = typeof promiseData === 'object' && !isVueElementResponse
-
-          const toastSettings: PromiseIExtendedResult = isExtendedResult
-            ? (promiseData as PromiseIExtendedResult)
-            : { message: promiseData || '' }
-
-          this.create({ id, type: 'success', description, ...toastSettings })
-        }
-      })
-      .catch(async (error) => {
-        result = ['reject', error]
-        if (data.error !== undefined) {
-          shouldDismiss = false
-          const promiseData = typeof data.error === 'function' ? await data.error(error) : data.error
-
-          const description = typeof data.description === 'function' ? await data.description(error) : data.description
-
-          const isExtendedResult = typeof promiseData === 'object' && !(error && typeof error === 'object' && '__v_isVNode' in error)
-
-          const toastSettings: PromiseIExtendedResult = isExtendedResult
-            ? (promiseData as PromiseIExtendedResult)
-            : { message: promiseData || '' }
-
-          this.create({ id, type: 'error', description, ...toastSettings })
-        }
-      })
-      .finally(() => {
-        if (shouldDismiss) {
-          // Toast is still in load state (and will be indefinitely — dismiss it)
-          this.dismiss(id)
-          id = undefined
-        }
-
-        data.finally?.()
-      })
-
-    const unwrap = () =>
-      new Promise<ToastData>((resolve, reject) =>
-        originalPromise.then(() => (result[0] === 'reject' ? reject(result[1]) : resolve(result[1]))).catch(reject),
-      )
-
-    if (typeof id !== 'string' && typeof id !== 'number') {
-      // cannot Object.assign on undefined
-      return { unwrap }
-    }
-    else {
-      return Object.assign(id, { unwrap })
-    }
-  }
-
-  custom = (jsx: (id: number | string) => any, data?: ExternalToast) => {
-    const id = data?.id || toastsCounter++
-    this.create({ jsx: jsx(id), id, ...data })
-    return id
-  }
 
   getActiveToasts = () => {
     return this.toasts.filter(toast => !this.dismissedToasts.has(toast.id))
@@ -272,17 +141,6 @@ function toastFunction(message: titleT, data?: ExternalToast) {
   return id
 }
 
-function isHttpResponse(data: any): data is Response {
-  return (
-    data
-    && typeof data === 'object'
-    && 'ok' in data
-    && typeof data.ok === 'boolean'
-    && 'status' in data
-    && typeof data.status === 'number'
-  )
-}
-
 const basicToast = toastFunction
 
 const getHistory = () => ToastState.toasts
@@ -296,9 +154,7 @@ export const toast = Object.assign(
     info: ToastState.info,
     warning: ToastState.warning,
     error: ToastState.error,
-    custom: ToastState.custom,
     message: ToastState.message,
-    promise: ToastState.promise,
     dismiss: ToastState.dismiss,
     loading: ToastState.loading,
   },
@@ -329,29 +185,15 @@ export function useToast(): ToastComposable {
     history.value = ToastState.toasts.filter((t): t is ToastT => !('dismiss' in t)) as ToastT[]
   })
 
-  // Cleanup on unmount
   onUnmounted(() => {
     unsubscribe()
   })
 
   return {
-    // State
     toasts: computed(() => toasts.value),
     history: computed(() => history.value),
-    
-    // Methods
     toast,
-    success: ToastState.success,
-    error: ToastState.error,
-    info: ToastState.info,
-    warning: ToastState.warning,
-    loading: ToastState.loading,
-    custom: ToastState.custom,
-    promise: ToastState.promise as any,
     dismiss: ToastState.dismiss,
     dismissAll: () => ToastState.dismiss(),
-    getToasts: () => toasts.value as ToastT[],
-    getHistory: () => history.value,
-    toastFn: toast,
   }
 }

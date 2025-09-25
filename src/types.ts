@@ -1,31 +1,6 @@
-import type { VNode } from 'vue'
+import type { ComputedRef, VNode } from 'vue'
 
 export type ToastTypes = 'normal' | 'action' | 'success' | 'info' | 'warning' | 'error' | 'loading' | 'default'
-
-export type PromiseT<Data = any> = Promise<Data> | (() => Promise<Data>)
-
-export interface PromiseIExtendedResult extends ExternalToast {
-  message: VNode | string | PromiseIExtendedResult
-}
-
-export type PromiseTExtendedResult<Data = any>
-  = | PromiseIExtendedResult
-    | ((data: Data) => PromiseIExtendedResult | Promise<PromiseIExtendedResult>)
-
-export type PromiseTResult<Data = any>
-  = | string
-    | VNode
-    | ((data: Data) => VNode | string | Promise<VNode | string>)
-
-export type PromiseExternalToast = Omit<ExternalToast, 'description'>
-
-export type PromiseData<ToastData = any> = PromiseExternalToast & {
-  loading?: string | VNode
-  success?: PromiseTResult<ToastData> | PromiseTExtendedResult<ToastData>
-  error?: PromiseTResult | PromiseTExtendedResult
-  description?: PromiseTResult
-  finally?: () => void | Promise<void>
-}
 
 export interface ToastClassnames {
   toast?: string
@@ -78,7 +53,6 @@ export interface ToastT {
   cancel?: Action | VNode
   onDismiss?: (toast: ToastT) => void
   onAutoClose?: (toast: ToastT) => void
-  promise?: PromiseT
   cancelButtonStyle?: Record<string, any>
   actionButtonStyle?: Record<string, any>
   style?: Record<string, any>
@@ -201,26 +175,15 @@ export type ExternalToast = Omit<ToastT, 'id' | 'type' | 'title' | 'jsx' | 'dele
   toasterId?: string
 }
 
-// Vue 3 specific types
+
 export interface ToastComposable {
   // State
-  toasts: any
-  history: any
-  
+  toasts: ComputedRef<ToastT[]>
+  history: ComputedRef<ToastT[]>
   // Methods
-  toast: ToastFunction
-  success: (message: VNode | string, data?: ExternalToast) => number | string
-  error: (message: VNode | string, data?: ExternalToast) => number | string
-  info: (message: VNode | string, data?: ExternalToast) => number | string
-  warning: (message: VNode | string, data?: ExternalToast) => number | string
-  loading: (message: VNode | string, data?: ExternalToast) => number | string
-  custom: (jsx: (id: number | string) => VNode, data?: ExternalToast) => number | string
-  promise: <ToastData>(promise: PromiseT<ToastData>, data?: PromiseData<ToastData>) => number | string | undefined
+  toast: ToastFunction  
   dismiss: (id?: number | string) => number | string | undefined
   dismissAll: () => void
-  getToasts: () => ToastT[]
-  getHistory: () => ToastT[]
-  toastFn: ToastFunction
 }
 
 export interface ToastFunction {
@@ -230,7 +193,5 @@ export interface ToastFunction {
   info: (message: VNode | string, data?: ExternalToast) => number | string
   warning: (message: VNode | string, data?: ExternalToast) => number | string
   loading: (message: VNode | string, data?: ExternalToast) => number | string
-  custom: (jsx: (id: number | string) => VNode, data?: ExternalToast) => number | string
   message: (message: VNode | string, data?: ExternalToast) => number | string
-  promise: <ToastData>(promise: PromiseT<ToastData>, data?: PromiseData<ToastData>) => number | string | undefined
 }

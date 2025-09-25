@@ -8,8 +8,6 @@
       <button @click="testInfo">Info Toast</button>
       <button @click="testWarning">Warning Toast</button>
       <button @click="testLoading">Loading Toast</button>
-      <button @click="testCustom">Custom Toast</button>
-      <button @click="testPromise">Promise Toast</button>
       <button @click="dismissAll">Dismiss All</button>
     </div>
 
@@ -38,85 +36,52 @@
 </template>
 
 <script setup lang="ts">
-import { h } from 'vue'
 import { useToast } from '../src/composables/useToast'
 
 // Toast composable
 const { 
-  toast, 
-  success, 
-  error, 
-  info, 
-  warning, 
-  loading, 
-  custom, 
-  promise, 
-  dismissAll, 
-  toasts 
+  toast,  
+  toasts,
+  dismissAll
 } = useToast()
 
 // Test methods
 const testSuccess = () => {
-  success('操作成功！', {
+  toast.success('操作成功！', {
     description: '数据已保存到服务器',
     duration: 3000
   })
 }
 
 const testError = () => {
-  error('操作失败！', {
+  toast.error('操作失败！', {
     description: '请检查网络连接后重试',
     duration: 5000
   })
 }
 
 const testInfo = () => {
-  info('新消息', {
+  toast.info('新消息', {
     description: '您有3条未读消息',
     duration: 4000
   })
 }
 
 const testWarning = () => {
-  warning('注意', {
+  toast.warning('注意', {
     description: '此操作不可撤销',
     duration: 6000
   })
 }
 
 const testLoading = () => {
-  loading('处理中...', {
+  toast.loading('处理中...', {
     description: '请稍候',
     duration: 0 // Don't auto-dismiss loading toasts
   })
 }
 
-const testCustom = () => {
-  custom((id) => {
-    // Return a Vue VNode using h function
-    return h('div', [
-      h('h4', 'Custom Toast'),
-      h('p', 'This is a custom toast with Vue content')
-    ])
-  }, {
-    duration: 4000
-  })
-}
 
-const testPromise = () => {
-  const mockPromise = new Promise((resolve, reject) => {
-    setTimeout(() => {
-      Math.random() > 0.5 ? resolve('Success!') : reject(new Error('Failed!'))
-    }, 2000)
-  })
-
-  promise(mockPromise, {
-    loading: 'Processing request...',
-    success: (data) => `Request completed: ${data}`,
-    error: (error) => `Request failed: ${error.message}`,
-    description: 'This will resolve or reject randomly'
-  })
-}
 </script>
 
 <style scoped>

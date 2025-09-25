@@ -22,12 +22,6 @@ export type {
   ExternalToast,
   HeightT,
   Position,
-  PromiseData,
-  PromiseExternalToast,
-  PromiseIExtendedResult,
-  PromiseT,
-  PromiseTExtendedResult,
-  PromiseTResult,
   SwipeDirection,
   SwipeStateTypes,
   Theme,
@@ -82,11 +76,6 @@ export function createVueToast(options: VueToastOptions = {}) {
 
       // Add global properties
       app.config.globalProperties.$toast = useToast().toast
-      app.config.globalProperties.$toastSuccess = useToast().success
-      app.config.globalProperties.$toastError = useToast().error
-      app.config.globalProperties.$toastInfo = useToast().info
-      app.config.globalProperties.$toastWarning = useToast().warning
-      app.config.globalProperties.$toastLoading = useToast().loading
     },
   }
 }
