@@ -19,7 +19,6 @@
     :aria-label="containerAriaLabel"
     @keydown="handleKeyDown"
   >
-    <!-- Debug: {{ visibleToasts.length }} toasts, {{ toasts.length }} total -->
     <Toast
       v-for="(toast, index) in visibleToasts"
       :key="(toast as unknown as ToastT).id"
