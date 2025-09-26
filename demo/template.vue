@@ -38,14 +38,8 @@
 <script setup lang="ts">
 import { useToast } from '../src/composables/useToast'
 
-// Toast composable
-const { 
-  toast,  
-  toasts,
-  dismissAll
-} = useToast()
+const {  toast,  toasts, dismissAll } = useToast()
 
-// Test methods
 const testSuccess = () => {
   toast.success('操作成功！', {
     description: '数据已保存到服务器',
